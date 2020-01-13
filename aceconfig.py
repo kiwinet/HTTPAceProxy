@@ -76,6 +76,13 @@ class AceConfig(acedefconfig.AceDefConfig):
         '127.0.0.1',
         '192.168.0.0/16',
         )
+    # Password protection
+    protection = True
+    # Passwords list
+    protectionKeyList = (
+        'pass1',
+        'pass2',
+    )
     # Maximum concurrent connections (video clients)
     maxconns = 10
     # Use 'Transfer-encoding: chunked' in HTTP AceProxy responses

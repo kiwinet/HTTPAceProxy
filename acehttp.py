@@ -100,8 +100,31 @@ class HTTPHandler(BaseHTTPRequestHandler):
         if AceConfig.firewall and not checkFirewall(self.clientip):
            self.send_error(401, '[{clientip}]: Dropping connection due to firewall rules'.format(**self.__dict__), logging.ERROR)
 
+
         self.path, _, self.query = self.path.partition('?')
         self.path = self.path.rstrip('/')
+        self.pathOrig = self.path
+        self.clientKey = ''
+
+        if AceConfig.protection:
+          self.splittedpath = self.path.split('/')
+          i = 0
+          self.path = ''
+          for p in self.splittedpath:
+            if not i == 1:
+              self.path = self.path + p + '/'
+            else:
+              self.clientKey = '/' + p
+              self.clientKeyCheck = p
+            i = i + 1
+            # print('New path: ' + str(self.path))
+          self.path = self.path.rstrip('/')
+          self.splittedpath = self.path.split('/')
+
+        # print('Klient key: ' + str(self.clientKey))
+        if AceConfig.protection and not checkProtection(self.clientKeyCheck):
+          self.send_error(401, '[{clientip}]: Dropping connection due to wrong user key'.format(**self.__dict__), logging.ERROR)
+
         # Pretend to work fine with Fake or HEAD request.
         if self.command == 'HEAD' or AceConfig.isFakeRequest(self.path, self.query, self.headers):
            # Return 200 and exit
@@ -357,6 +380,14 @@ def checkFirewall(clientip):
     try: clientinrange = any([IPAddress(clientip) in IPNetwork(i) for i in AceConfig.firewallnetranges])
     except: logger.error('Check firewall netranges settings !'); return False
     return not ((AceConfig.firewallblacklistmode and clientinrange) or (not AceConfig.firewallblacklistmode and not clientinrange))
+
+def checkProtection(clientKey):
+    try:
+      if clientKey in AceConfig.protectionKeyList:
+        return True
+      else:
+        return False
+    except: logger.error('Check protection key list settings !'); return False
 
 def detectPort():
     try:

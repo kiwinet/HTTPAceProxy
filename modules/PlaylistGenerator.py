@@ -67,25 +67,25 @@ class PlaylistGenerator(object):
             if not params.get('parse_url'):
                if params.get('path') and params.get('path').endswith('channel'): # For plugins channel name maping
                   params.update({'value': url})
-                  item['url'] = urlunparse(u'{schema};{netloc};{path}/{value}.{ext};;{query};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}{path}/{value}.{ext};;{query};'.format(**params).split(';'))
                elif url.startswith(('http://', 'https://')) and url.endswith(('.acelive', '.acestream', '.acemedia', '.torrent')): # For .acelive and .torrent
                   params.update({'value': quote(url,'')})
-                  item['url'] = urlunparse(u'{schema};{netloc};/url/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}/url/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
                elif url.startswith('infohash://'): # For INFOHASHes
                   params.update({'value': url.split('/')[2]})
-                  item['url'] = urlunparse(u'{schema};{netloc};/infohash/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}/infohash/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
                elif url.startswith('acestream://'): # For PIDs
                   params.update({'value': url.split('/')[2]})
-                  item['url'] = urlunparse(u'{schema};{netloc};/content_id/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}/content_id/{value}/{name}.{ext};;{query};'.format(**params).split(';'))
                elif params.get('archive') and url.isdigit(): # For archive channel id's
                   params.update({'value': url})
-                  item['url'] = urlunparse(u'{schema};{netloc};/archive/play;;id={value};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}/archive/play;;id={value};'.format(**params).split(';'))
                elif not params.get('archive') and url.isdigit(): # For channel id's
                   params.update({'value': url})
-                  item['url'] = urlunparse(u'{schema};{netloc};/channels/play;;id={value};'.format(**params).split(';'))
+                  item['url'] = urlunparse(u'{schema};{netloc};{clientKey}/channels/play;;id={value};'.format(**params).split(';'))
 
             return self.m3uchanneltemplate.format(**item)
-        params.update({'schema': 'http', 'netloc': params.get('hostport'), 'ext': query_get(params.get('query',''), 'ext', 'ts')})
+        params.update({'schema': 'http', 'netloc': params.get('hostport'), 'clientKey': params.get('clientKey'), 'ext': query_get(params.get('query',''), 'ext', 'ts')})
         return ensure_binary(params.get('header', self.m3uemptyheader if params.get('empty_header') else self.m3uheader) + ''.join(map(line_generator, self.sort(self.itemlist))))
 
     def exportxml(self, hostport, path='',):

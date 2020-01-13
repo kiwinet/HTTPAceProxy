@@ -104,7 +104,8 @@ class Torrenttelik(object):
            exported = self.playlist.exportm3u( hostport=connection.headers['Host'],
                                                path='' if not self.channels else '/{reqtype}/channel'.format(**connection.__dict__),
                                                header=config.m3uheadertemplate,
-                                               query=connection.query
+                                               query=connection.query,
+                                               clientKey=connection.clientKey
                                               )
            response_headers = {'Content-Type': 'audio/mpegurl; charset=utf-8', 'Connection': 'close', 'Access-Control-Allow-Origin': '*'}
            try:
